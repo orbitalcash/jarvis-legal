@@ -1,0 +1,35 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>JARVIS — Connexion TikTok</title>
+<style>body{background:#000a00;color:#00ff88;font-family:Courier New,monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center}.box{border:1px solid #00ff88;padding:40px;max-width:400px}.title{font-size:28px;font-weight:bold;letter-spacing:8px;margin-bottom:20px}.msg{color:#00cc66;margin:10px 0}.spinner{font-size:32px;animation:spin 1s linear infinite;margin:20px 0}@keyframes spin{to{transform:rotate(360deg)}}.ok{color:#00ff88;font-size:18px;display:none}.err{color:#ff4444;display:none}</style></head>
+<body><div class="box">
+<div class="title">J.A.R.V.I.S</div>
+<div class="spinner" id="sp">⟳</div>
+<div class="msg" id="msg">Connexion TikTok en cours...</div>
+<div class="ok" id="ok">✅ Connecté !<br><small>Fermeture dans 3 secondes...</small></div>
+<div class="err" id="err">❌ Erreur de connexion</div>
+</div>
+<script>
+const params = new URLSearchParams(window.location.search);
+const code  = params.get("code");
+const state = params.get("state");
+const error = params.get("error");
+
+if(error){
+  document.getElementById("sp").style.display="none";
+  document.getElementById("msg").style.display="none";
+  document.getElementById("err").style.display="block";
+  document.getElementById("err").textContent="❌ " + error;
+} else if(code){
+  fetch("http://localhost:7862/tiktok/callback?code=" + encodeURIComponent(code) + "&state=" + encodeURIComponent(state||""))
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById("sp").style.display="none";
+      document.getElementById("msg").style.display="none";
+      document.getElementById("ok").style.display="block";
+      setTimeout(()=>window.close(), 3000);
+    })
+    .catch(e => {
+      // Essai direct si fetch bloque (CORS)
+      window.location.href = "http://localhost:7862/tiktok/callback?code=" + encodeURIComponent(code) + "&state=" + encodeURIComponent(state||"");
+    });
+}
+</script></body></html>
